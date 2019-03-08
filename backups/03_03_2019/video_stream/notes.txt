@@ -1,0 +1,21 @@
+the speaker should not be part of the dialog thread
+
+need to close the capture thread before we end up going back from the video player.
+
+will also have a audio playback thread
+
+signals not connected
+
+do we need mutex for startcontext signal transfer??
+
+only issue is in decode.
+
+have remvoved video start thread for now so that only one thread has access to file pointer
+
+
+
+NOTE: in audio start thread start thread function init parameters are overwritten. remove this
+when finishing testing this function.
+
+
+the audio decode will only work with s32p formats. it is better to encode frame directly in s16le

@@ -1,0 +1,5 @@
+the speaker should not be part of the dialog thread
+
+need to close the capture thread before we end up going back from the video player.
+
+will also have a audio playback thread
