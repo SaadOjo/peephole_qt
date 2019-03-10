@@ -6,14 +6,9 @@ encoder::encoder(QObject *parent) :
 
     //video_st = { 0 };
     //audio_st = { 0 };
-    memset(&video_st, 0, sizeof(OutputStream));
-    memset(&audio_st, 0, sizeof(OutputStream));
-    have_video = 0;
-    have_audio = 0;
-    encode_video = 0;
-    encode_audio = 0;
-    opt = NULL;
-    initialized = false;
+
+    //moved to init. (solved the problem)
+
 }
 
 void encoder::encode_video_frame(safe_encode_video_context* data)
@@ -34,7 +29,7 @@ void encoder::encode_video_frame(safe_encode_video_context* data)
             encode_video = !write_video_frame(oc, &video_st,data->data);
 
         }
-        qDebug("exiting encode_video_slot.");
+        //qDebug("exiting encode_video_slot.");
         data->put_data = false;
         free(data->data);
 
@@ -47,6 +42,16 @@ void encoder::encode_video_frame(safe_encode_video_context* data)
 
 void encoder::init_format()
 {
+
+    memset(&video_st, 0, sizeof(OutputStream));
+    memset(&audio_st, 0, sizeof(OutputStream));
+    have_video = 0;
+    have_audio = 0;
+    encode_video = 0;
+    encode_audio = 0;
+    opt = NULL;
+    initialized = false;
+
 //auto generate filename based of time and suff
     filename = (char*) "live_out.mp4";
 

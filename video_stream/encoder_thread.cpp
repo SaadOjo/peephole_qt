@@ -24,11 +24,16 @@ void encoder_thread::run(){
 
     enc.init_format();
 
-    while(!got_ctx); //can change with wait condition
+    while(!got_ctx) //can change with wait condition
+    {
+      //  qDebug()<<"Waiting for context!";
+    }
+
+    //video_ctx->data = NULL;
 
     while(continue_loop)
     {
-        enc.encode_video_frame(video_ctx);
+       enc.encode_video_frame(video_ctx);
     }
     enc.close();
 }
@@ -42,6 +47,7 @@ encoder_thread::~encoder_thread()
 void encoder_thread::stopThread()
 {
 
+//got_ctx = false; //just to see
 
 continue_loop = false; // allow the run command finish by ending while //may need mutex
 this->wait();          //wait for the thread to finish
