@@ -43,6 +43,7 @@ public:
     void setFileName(QString);
     void setDeviceName(QString);
     image_with_mutex *myIWM;
+    unsigned char* encoder_image_buffer;
 
 protected:
     void run();

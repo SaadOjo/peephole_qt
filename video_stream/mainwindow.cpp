@@ -11,9 +11,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,SIGNAL(setImage(image_with_mutex*)),ui->videoPane,SLOT(setPicture(image_with_mutex*)));
     //connect(mic.audiodeviceIO,SIGNAL(update()),this,SLOT(handleSound()));
     connect(&mic, SIGNAL(soundAvailable(safe_sound*)),&spkr, SLOT(playSound(safe_sound*)));
-    connect(&ui->videoPane->thread, SIGNAL(give_encode_video_context(safe_encode_video_context*)),&enc_thr, SLOT(act_on_encoder_set_context(safe_encode_video_context*)));
-
-
+    connect(&ui->videoPane->thread, SIGNAL(give_encode_video_context(safe_encode_video_context*)),&enc_thr, SLOT(act_on_encoder_video_set_context(safe_encode_video_context*)));
+    connect(&mic, SIGNAL(give_encode_audio_context(safe_encode_audio_context*)),&enc_thr, SLOT(act_on_encoder_audio_set_context(safe_encode_audio_context*)));
 }
 
 MainWindow::~MainWindow()

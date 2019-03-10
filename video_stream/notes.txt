@@ -31,3 +31,11 @@ for now recording start and stop same with start stop. will later remove start s
 issue with exits. not working properly.
 
 use wait conditions to improve performance,
+
+
+we are messing with speaker wait conditions. I think it is not a good idea to have them in the main dialog thread.
+
+
+speaker and mike buffer changed to 4096 bytes.
+
+also have to change audio playback thread's frequency.

@@ -32,6 +32,10 @@
 #include<QImage>
 #include<QWaitCondition>
 
+#define RECORDING_FREQUENCY 44100
+//#define RECORDING_FREQUENCY 8000
+
+
 //#include <inttypes.h>
 
 extern "C"
@@ -51,7 +55,7 @@ struct image_with_mutex
 struct safe_sound
 {
     QMutex mutex;
-    QWaitCondition cond;
+    QWaitCondition cond; //this condition might not be being used.
     unsigned char *sound;
 };
 
@@ -77,6 +81,15 @@ struct start_context
 struct safe_encode_video_context
 {
     QMutex        mutex;
+    unsigned char *data;
+    bool          put_data;
+    QWaitCondition cond;
+};
+
+struct safe_encode_audio_context
+{
+    QMutex        mutex;
+    int            nb_samples;
     unsigned char *data;
     bool          put_data;
     QWaitCondition cond;

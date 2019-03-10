@@ -4,8 +4,8 @@ Speaker::Speaker(QObject *parent) :
     QObject(parent)
 {
     periods = 2;
-    buffer_frames = (8192*periods)>>2;
-    frequency = 44100;
+    buffer_frames = (4096*periods)>>2;
+    frequency = RECORDING_FREQUENCY;
     started = false;
 
 }
@@ -39,8 +39,9 @@ void Speaker::playSound(safe_sound  *sound)
     while ((pcmreturn = snd_pcm_writei(pcm_handle, sound->sound, frames)) < 0 && started) {
      snd_pcm_prepare(pcm_handle);
      //add wait condition here
-     sound->cond.wait(&sound->mutex);
+     //sound->cond.wait(&sound->mutex);
     fprintf(stderr, "<<<<<<<<<<<<<<< Buffer Underrun >>>>>>>>>>>>>>>\n");
+    //we are not freeing the memory.
     }
     sound->mutex.unlock();
 

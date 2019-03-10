@@ -26,7 +26,8 @@ protected:
 signals:
 
 private slots:
-    void act_on_encoder_set_context(safe_encode_video_context* context); //take the queue pointer
+    void act_on_encoder_video_set_context(safe_encode_video_context* context); //take the queue pointer
+    void act_on_encoder_audio_set_context(safe_encode_audio_context* context);
 
     //void act_on_encoder_thread_start(safe_encode_video_context*); //take the queue pointer
     //dont immedietly start recording
@@ -36,9 +37,11 @@ private slots:
 
 private:
     bool continue_loop;
-    bool got_ctx;
+    bool got_video_ctx, got_audio_ctx;
     encoder enc;
     safe_encode_video_context* video_ctx;
+    safe_encode_audio_context* audio_ctx;
+
 
 
 };

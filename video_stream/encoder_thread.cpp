@@ -4,38 +4,80 @@ encoder_thread::encoder_thread(QObject *parent) : QThread(parent)
 {
 
     continue_loop = false;
-    got_ctx = false;
+    got_video_ctx = false;
+    got_audio_ctx = false;
+
 
 }
-void encoder_thread::act_on_encoder_set_context(safe_encode_video_context* context)
+void encoder_thread::act_on_encoder_video_set_context(safe_encode_video_context* context)
 {
-    qDebug()<<"The entering context save.!";
+    qDebug()<<"The entering video context save.!";
     context->mutex.lock();
-    video_ctx = context; //dunno if it will work.
+    video_ctx = context; //dunno if it will work. (apparently works)
     //can use the same lock to protect the data as well.
     context->mutex.unlock();
-    got_ctx = true;
-
+    got_video_ctx = true;
 }
 
-
+void encoder_thread::act_on_encoder_audio_set_context(safe_encode_audio_context* context)
+{
+    qDebug()<<"The entering audio context save.!";
+    context->mutex.lock();
+    audio_ctx = context; //dunno if it will work. (apparently works)
+    //can use the same lock to protect the data as well.
+    context->mutex.unlock();
+    got_audio_ctx = true;
+}
 
 void encoder_thread::run(){
 
-    enc.init_format();
+    int j = 0;
 
-    while(!got_ctx) //can change with wait condition
+    enc.init_format();
+//add video and audio ctx get
+
+    while(!got_video_ctx||!got_audio_ctx) //can change with wait condition
     {
       //  qDebug()<<"Waiting for context!";
     }
 
-    //video_ctx->data = NULL;
-
     while(continue_loop)
     {
-       enc.encode_video_frame(video_ctx);
+        enc.encode_video_frame(video_ctx);
+        enc.encode_audio_frame(audio_ctx);
     }
+    /*
+    while( j<100)
+    {
+
+        if(j<10)
+        {
+            if(enc.encode_video_frame(video_ctx)) //maybe this should return if it is slower
+            {
+                j++;
+            }
+            //so this works
+            //even though we first store audio and then video both start playing at the correct time
+            //yes it works
+        }
+        else
+        {
+            if(enc.encode_audio_frame(audio_ctx))
+            {
+                j++;
+            }
+
+        }
+
+
+       //enc.encode_video_frame(video_ctx);  //maybe this should return if it is slower
+       //if no data just move on do not wait. //whatever is slower should return
+       //what happens if there are two audio frames one after another??
+       //enc.encode_audio_frame(audio_ctx);
+    }
+    */
     enc.close();
+
 }
 
 

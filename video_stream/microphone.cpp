@@ -4,10 +4,19 @@
 Microphone::Microphone(QObject *parent) : QThread(parent)
 {
     periods = 2;
-    buffer_frames = (8192*periods)>>2;
+    buffer_frames = (4096*periods)>>2;
     //fprintf(stderr ,"The requested frame size is: %d\n",buffer_frames);
-    frequency = 44100;
+    //frequency = 44100;
+    frequency = RECORDING_FREQUENCY;
+
     mySS = new(safe_sound);
+
+    my_safe_encode_audio_context.mutex.lock();
+    my_safe_encode_audio_context.put_data = false;
+    my_safe_encode_audio_context.nb_samples = 0;
+    my_safe_encode_audio_context.mutex.unlock();
+
+    context_data_filled_atleast_once = 0;
 
 }
 
@@ -15,31 +24,67 @@ void Microphone::run(){
 // Do main stuff here.
     init();
 
-    mySS->mutex.lock();
+    unsigned char* temp_audio_buffer = (unsigned char *)malloc(periodsize);
+
+    my_safe_encode_audio_context.mutex.lock();
+    my_safe_encode_audio_context.nb_samples = periodsize;
+    my_safe_encode_audio_context.mutex.unlock();
+
     mySS->sound = (unsigned char *)malloc(periodsize);
 
     while(continue_loop)
     {
 
-        while ((pcmreturn = snd_pcm_readi(pcm_handle, mySS->sound, periodsize>>2)) < 0) {
+        while ((pcmreturn = snd_pcm_readi(pcm_handle, temp_audio_buffer, periodsize>>2)) < 0) {
           fprintf(stderr, "Ops!\n");
           snd_pcm_prepare(pcm_handle);
           fprintf(stderr, "<<<<<<<<<<<<<<< Buffer Overrun >>>>>>>>>>>>>>>\n");
 
         }
+
+        mySS->mutex.lock();
+        memcpy(mySS->sound,temp_audio_buffer,periodsize);
+        //mySS->cond.wakeAll();
+        mySS->mutex.unlock(); //maybe we do not want our video thread to sleep
+
+        emit soundAvailable(mySS);
+
+        if(context_data_filled_atleast_once == 0)
+        {
+            encoder_audio_buffer =(unsigned char*)malloc(periodsize); //memory leak possible as all the data might not be freed by the encoder
+            memcpy(encoder_audio_buffer, temp_audio_buffer, periodsize); //use wait condition
+
+            my_safe_encode_audio_context.mutex.lock();
+            my_safe_encode_audio_context.data = encoder_audio_buffer;
+            my_safe_encode_audio_context.put_data = true;
+            my_safe_encode_audio_context.mutex.unlock(); //more like a wait condition here just to make sure all data is freed,
+
+            emit give_encode_audio_context(&my_safe_encode_audio_context);
+            //emit encode_video_signal();
+            context_data_filled_atleast_once = 1;
+
+        }
+        else
+        {
+             my_safe_encode_audio_context.mutex.lock();  //audio encoding is taking too long.
+            //my_safe_encode_video_context.data = encoder_image_buffer; (redundant to do it here)
+            memcpy(encoder_audio_buffer, temp_audio_buffer, periodsize); //use wait condition
+            my_safe_encode_audio_context.put_data = true;
+            my_safe_encode_audio_context.cond.wakeOne();
+            my_safe_encode_audio_context.mutex.unlock(); //more like a wait condition here just to make sure all data is freed,
+
+        }
+
         //left = *sound<<8 & *(sound + 1);
         //right = *(sound+2) & *(sound + 3);
        // fprintf(stderr,"Left: %d, Right: %d \n", left, right );
-        mySS->cond.wakeAll();
-        mySS->mutex.unlock();
-       emit soundAvailable(mySS);
 
 
+        qDebug("Period size is: %d \n",periodsize);
 
     }
 
 //Close everything
-
         //free(sound);
         snd_pcm_drain(pcm_handle);
         if(snd_pcm_close(pcm_handle))

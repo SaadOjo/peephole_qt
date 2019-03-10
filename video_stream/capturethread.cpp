@@ -153,30 +153,39 @@ void CaptureThread::run(){
             */
 
 
-
-
-
             unsigned char* image_buffer =(unsigned char*)malloc(fmt.fmt.pix.sizeimage+qstrlen(header));
-            unsigned char* encoder_image_buffer =(unsigned char*)malloc(fmt.fmt.pix.sizeimage); //memory leak possible as all the data might not be freed by the encoder
-            memcpy(encoder_image_buffer, buffers[buf.index].start, fmt.fmt.pix.sizeimage); //use wait condition
 
             qDebug("capture thread running.");
 
 
             //if more data send than encoded (slow encoder)
 
-         my_safe_encode_video_context.mutex.lock();
-         my_safe_encode_video_context.data = encoder_image_buffer;
-         my_safe_encode_video_context.put_data = true;
-         my_safe_encode_video_context.cond.wakeOne();
-         my_safe_encode_video_context.mutex.unlock(); //more like a wait condition here just to make sure all data is freed,
+
 
          //free(encoder_image_buffer);
          if(context_data_filled_atleast_once == 0)
          {
+             encoder_image_buffer =(unsigned char*)malloc(fmt.fmt.pix.sizeimage); //memory leak possible as all the data might not be freed by the encoder
+             memcpy(encoder_image_buffer, buffers[buf.index].start, fmt.fmt.pix.sizeimage); //use wait condition
+
+             my_safe_encode_video_context.mutex.lock();
+             my_safe_encode_video_context.data = encoder_image_buffer;
+             my_safe_encode_video_context.put_data = true;
+             my_safe_encode_video_context.mutex.unlock(); //more like a wait condition here just to make sure all data is freed,
+
              emit give_encode_video_context(&my_safe_encode_video_context);
              //emit encode_video_signal();
              context_data_filled_atleast_once = 1;
+
+         }
+         else
+         {
+             my_safe_encode_video_context.mutex.lock();
+             //my_safe_encode_video_context.data = encoder_image_buffer;
+             memcpy(encoder_image_buffer, buffers[buf.index].start, fmt.fmt.pix.sizeimage); //use wait condition
+             my_safe_encode_video_context.put_data = true;
+             my_safe_encode_video_context.cond.wakeOne();
+             my_safe_encode_video_context.mutex.unlock(); //more like a wait condition here just to make sure all data is freed,
 
          }
 

@@ -51,7 +51,9 @@ public:
     void put_data(); //testing function. it will be replaced by slots.
     void close();
     int is_initialized(); //are we using it?
-    void encode_video_frame(safe_encode_video_context*);
+    bool encode_video_frame(safe_encode_video_context*);
+    bool encode_audio_frame(safe_encode_audio_context*);
+
 
     //can personally set up the output formats.
 signals:
@@ -80,8 +82,8 @@ private:
     void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt);
     int write_frame(AVFormatContext *fmt_ctx, const AVRational *time_base, AVStream *st, AVPacket *pkt);
 
-    AVFrame *get_audio_frame(OutputStream *ost);
-    int write_audio_frame(AVFormatContext *oc, OutputStream *ost);
+    AVFrame *get_audio_frame(OutputStream *ost, unsigned char* data);
+    int write_audio_frame(AVFormatContext *oc, OutputStream *ost, unsigned char* data);
     void open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *ost, AVDictionary *opt_arg);
     AVFrame *alloc_audio_frame(enum AVSampleFormat sample_fmt,
                                       uint64_t channel_layout,

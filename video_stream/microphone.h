@@ -28,13 +28,18 @@ public:
     void stopThread();
     void startThread();
     safe_sound *mySS;
+    safe_encode_audio_context my_safe_encode_audio_context;
+    unsigned char *encoder_audio_buffer;
 
 protected:
     void run();
 signals:
     void soundAvailable(safe_sound * sound);
+    void give_encode_audio_context(safe_encode_audio_context*);
 
 private:
+    int context_data_filled_atleast_once;
+
     bool continue_loop;
     int periods;
     int pcmreturn;

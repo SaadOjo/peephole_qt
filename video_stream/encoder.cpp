@@ -11,8 +11,9 @@ encoder::encoder(QObject *parent) :
 
 }
 
-void encoder::encode_video_frame(safe_encode_video_context* data)
+bool encoder::encode_video_frame(safe_encode_video_context* data)
 {
+    bool ret = false;
     if(initialized)
     {
         data->mutex.lock();
@@ -20,22 +21,53 @@ void encoder::encode_video_frame(safe_encode_video_context* data)
         //qDebug("entering encode video slot.");
         if(data->put_data==false)
         {
-            data->cond.wait(&data->mutex);
+            //data->cond.wait(&data->mutex);
         }
-
-        if(encode_video)
+        else if(encode_video)
         {
             //encode_video = !write_video_frame(oc, &video_st,NULL);
             encode_video = !write_video_frame(oc, &video_st,data->data);
+            ret = true;
 
         }
         //qDebug("exiting encode_video_slot.");
         data->put_data = false;
-        free(data->data);
+        //free(data->data); (dont need to free data any more as only allocated once)
 
         data->mutex.unlock();
+        return ret;
 
 
+    }
+
+}
+
+bool encoder::encode_audio_frame(safe_encode_audio_context* data)
+{
+    bool ret = false;
+
+    if(initialized)
+    {
+        data->mutex.lock();
+        //qApp->processEvents();
+        //qDebug("entering encode video slot.");
+        if(data->put_data==false)
+        {
+            //data->cond.wait(&data->mutex); do not wair just move on
+        }
+        else if(encode_audio)
+        {
+            //encode_video = !write_video_frame(oc, &video_st,NULL);
+            encode_audio = !write_audio_frame(oc, &audio_st,data->data);
+            ret = true;
+
+        }
+        //qDebug("exiting encode_video_slot.");
+        data->put_data = false;
+        //free(data->data); (dont need to free data any more as only allocated once)
+
+        data->mutex.unlock();
+        return ret;
     }
 
 }
@@ -51,6 +83,7 @@ void encoder::init_format()
     encode_audio = 0;
     opt = NULL;
     initialized = false;
+
 
 //auto generate filename based of time and suff
     filename = (char*) "live_out.mp4";
@@ -229,13 +262,18 @@ void encoder::add_stream(OutputStream *ost, AVFormatContext *oc,
             (*codec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
         c->bit_rate    = 64000;
         c->sample_rate = 44100;
+    //    c->sample_rate = RECORDING_FREQUENCY;
+/*
         if ((*codec)->supported_samplerates) {
             c->sample_rate = (*codec)->supported_samplerates[0];
             for (i = 0; (*codec)->supported_samplerates[i]; i++) {
-                if ((*codec)->supported_samplerates[i] == 44100)
-                    c->sample_rate = 44100;
+                if ((*codec)->supported_samplerates[i] == 44100)   //                if ((*codec)->supported_samplerates[i] == 44100)
+                    c->sample_rate = 44100;                                          //c->sample_rate = 44100;
+
             }
+
         }
+        */
         c->channels        = av_get_channel_layout_nb_channels(c->channel_layout);
         c->channel_layout = AV_CH_LAYOUT_STEREO;
         if ((*codec)->channel_layouts) {
@@ -302,9 +340,16 @@ void encoder::open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *ost,
     /* increment frequency by 110 Hz per second */
     ost->tincr2 = 2 * M_PI * 110.0 / c->sample_rate / c->sample_rate;
     if (c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
-        nb_samples = 10000;
+        nb_samples = 1024;
+        //nb_samples = 10000;
+
     else
         nb_samples = c->frame_size;
+
+    fprintf(stderr, "number of samples are: %d\n", nb_samples);
+
+    //for this format the number of samples seem to be 1024
+
     ost->frame     = alloc_audio_frame(c->sample_fmt, c->channel_layout,
                                        c->sample_rate, nb_samples);
     ost->tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, c->channel_layout,
@@ -335,15 +380,19 @@ void encoder::open_audio(AVFormatContext *oc, AVCodec *codec, OutputStream *ost,
         }
 }
 
-AVFrame *encoder::get_audio_frame(OutputStream *ost) //out own data here
+AVFrame *encoder::get_audio_frame(OutputStream *ost,unsigned char* data) //out own data here
 {
     AVFrame *frame = ost->tmp_frame;
     int j, i, v;
-    int16_t *q = (int16_t*)frame->data[0];
+    //int16_t *q = (int16_t*)frame->data[0];
     /* check if we want to generate more frames */
-    if (av_compare_ts(ost->next_pts, ost->enc->time_base,
+
+    /*if (av_compare_ts(ost->next_pts, ost->enc->time_base,
                       STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
+
         return NULL;
+    */
+    /*
     for (j = 0; j <frame->nb_samples; j++) {
         v = (int)(sin(ost->t) * 10000);
         for (i = 0; i < ost->enc->channels; i++)
@@ -351,11 +400,19 @@ AVFrame *encoder::get_audio_frame(OutputStream *ost) //out own data here
         ost->t     += ost->tincr;
         ost->tincr += ost->tincr2;
     }
+    */
+    memcpy(frame->data[0],data,frame->nb_samples*ost->enc->channels*2); //S16_two_channels
+    //memcpy(frame->data[0],data,4096); //S16_two_channels
+    //memset(data,0,1024); //S16_two_channels
+
+    //memset(frame->data[0],0,4096); //S16_two_channels
+
+
     frame->pts = ost->next_pts;
     ost->next_pts  += frame->nb_samples;
     return frame;
 }
-int encoder::write_audio_frame(AVFormatContext *oc, OutputStream *ost)
+int encoder::write_audio_frame(AVFormatContext *oc, OutputStream *ost, unsigned char *data)
 {
     AVCodecContext *c;
     AVPacket pkt = { 0 }; // data and size must be 0;
@@ -365,7 +422,7 @@ int encoder::write_audio_frame(AVFormatContext *oc, OutputStream *ost)
     int dst_nb_samples;
     av_init_packet(&pkt);
     c = ost->enc;
-    frame = get_audio_frame(ost);
+    frame = get_audio_frame(ost,data);
     if (frame) {
         /* convert samples from native format to destination codec format, using the resampler */
             /* compute destination number of samples */
