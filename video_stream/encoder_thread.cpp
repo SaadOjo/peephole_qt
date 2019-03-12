@@ -6,6 +6,7 @@ encoder_thread::encoder_thread(QObject *parent) : QThread(parent)
     continue_loop = false;
     got_video_ctx = false;
     got_audio_ctx = false;
+    filenumber = 0;
 
 
 }
@@ -32,8 +33,8 @@ void encoder_thread::act_on_encoder_audio_set_context(safe_encode_audio_context*
 void encoder_thread::run(){
 
     int j = 0;
-
-    enc.init_format();
+    sprintf(filename,"video_%d.mp4",filenumber++);
+    enc.init_format(filename);
 //add video and audio ctx get
 
     while(!got_video_ctx||!got_audio_ctx) //can change with wait condition
@@ -43,8 +44,8 @@ void encoder_thread::run(){
 
     while(continue_loop)
     {
-        enc.encode_video_frame(video_ctx);
-        enc.encode_audio_frame(audio_ctx);
+       enc.encode_video_frame(video_ctx);
+       enc.encode_audio_frame(audio_ctx);
     }
     /*
     while( j<100)

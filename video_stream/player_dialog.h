@@ -17,6 +17,8 @@ class player_dialog : public QDialog
 public:
     explicit player_dialog(QWidget *parent = 0);
     ~player_dialog();
+    void setFilename(QString filename);
+
 
 signals:
     void setImage(image_with_mutex *i);
@@ -37,6 +39,7 @@ private slots:
     void on_mute_chk_toggled(bool checked);
 
     void videoStoppedSlot();
+
 
 private:
     Ui::player_dialog *ui;

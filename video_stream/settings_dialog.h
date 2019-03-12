@@ -15,6 +15,9 @@ public:
     explicit settings_dialog(QWidget *parent = 0);
     ~settings_dialog();
     
+private slots:
+    void on_back_btn_clicked();
+
 private:
     Ui::settings_dialog *ui;
 };

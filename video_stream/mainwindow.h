@@ -7,7 +7,8 @@
 #include <QDebug>
 #include "microphone.h"
 #include "speaker.h"
-#include "player_dialog.h"
+//#include "player_dialog.h"
+#include "menu_dialog.h"
 #include "encoder_thread.h"
 #include "structures.h"
 
@@ -42,7 +43,8 @@ private:
     //encoder thread will come here
 
     Speaker spkr;
-    player_dialog *plr_diag;
+    //player_dialog *plr_diag;
+    menu_dialog *mnu_dlg;
 
 };
 

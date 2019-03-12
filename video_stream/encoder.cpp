@@ -72,7 +72,7 @@ bool encoder::encode_audio_frame(safe_encode_audio_context* data)
 
 }
 
-void encoder::init_format()
+void encoder::init_format(char * fname)
 {
 
     memset(&video_st, 0, sizeof(OutputStream));
@@ -86,7 +86,8 @@ void encoder::init_format()
 
 
 //auto generate filename based of time and suff
-    filename = (char*) "live_out.mp4";
+    //filename = (char*) "live_out.mp4";
+    filename = fname;
 
     //are not doing anything about the dictionary here.
 

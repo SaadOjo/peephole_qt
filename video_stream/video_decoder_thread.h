@@ -58,8 +58,8 @@ signals:
 
 private:
 
-    char* filename;
-
+    //char* filename;
+    QString filename;
     bool continue_loop;
 
     AVFormatContext   *pFormatCtx;

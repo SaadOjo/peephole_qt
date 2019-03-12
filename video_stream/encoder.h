@@ -47,7 +47,7 @@ public:
     explicit encoder(QObject *parent = 0);
     //where is the deconstructor?
 
-    void init_format();
+    void init_format(char * fname);
     void put_data(); //testing function. it will be replaced by slots.
     void close();
     int is_initialized(); //are we using it?

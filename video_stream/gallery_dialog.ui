@@ -34,7 +34,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QListView" name="listView"/>
+      <widget class="QListWidget" name="listWidget"/>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
@@ -53,7 +53,7 @@
           </size>
          </property>
          <property name="text">
-          <string>back</string>
+          <string>Back</string>
          </property>
         </widget>
        </item>
@@ -66,7 +66,7 @@
           </size>
          </property>
          <property name="text">
-          <string>play</string>
+          <string>Play</string>
          </property>
         </widget>
        </item>

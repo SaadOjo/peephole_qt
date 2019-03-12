@@ -12,3 +12,8 @@ settings_dialog::~settings_dialog()
 {
     delete ui;
 }
+
+void settings_dialog::on_back_btn_clicked()
+{
+    this->close();
+}

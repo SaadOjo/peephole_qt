@@ -244,6 +244,7 @@ void video_decoder_thread::setFilename(QString filename_string)
 
     //QByteArray ba = filename_string.toLocal8Bit();
     //filename = (char*)ba.data();
+    filename = filename_string;
 }
 
 
@@ -251,10 +252,12 @@ void video_decoder_thread::run(){
 
     int got_frame,ret;
 
-    filename = (char*)"/forlinx/media/test.mp4"; //this info will come from another file
+    //filename = (char*)"/forlinx/media/test.mp4"; //this info will come from another file
+    //filename = "/forlinx/media/test.mp4"; //this info will come from another file
+
 
     // Open video file
-    if(avformat_open_input(&pFormatCtx, filename, NULL, NULL)!=0) //gives error 11 when does not find file
+    if(avformat_open_input(&pFormatCtx, filename.toLatin1().constData(), NULL, NULL)!=0) //gives error 11 when does not find file
       exit(-1); // Couldn't open file
 
     // Retrieve stream information
@@ -262,7 +265,9 @@ void video_decoder_thread::run(){
         exit(-1); // Couldn't open file
 
     // Dump information about file onto standard error
-    av_dump_format(pFormatCtx, 0, filename, 0);
+    av_dump_format(pFormatCtx, 0, filename.toLatin1().constData(), 0);
+   // av_dump_format(pFormatCtx, 0, filename, 0);
+
 
     // Find the first video stream
     videoStream=-1;

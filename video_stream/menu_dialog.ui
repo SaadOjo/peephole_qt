@@ -86,7 +86,7 @@
           </size>
          </property>
          <property name="text">
-          <string>settings</string>
+          <string>Settings</string>
          </property>
         </widget>
        </item>
@@ -99,7 +99,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>gallery</string>
+          <string>Gallery</string>
          </property>
         </widget>
        </item>
@@ -120,7 +120,7 @@
         </size>
        </property>
        <property name="text">
-        <string>back</string>
+        <string>Back</string>
        </property>
       </widget>
      </item>

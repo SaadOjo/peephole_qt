@@ -107,10 +107,22 @@ void MainWindow::handleSound()
 void MainWindow::on_menu_btn_clicked()
 {
 
+    mnu_dlg = new menu_dialog(this);
+    mnu_dlg->setWindowState(Qt::WindowFullScreen);
+    mnu_dlg->exec();
+    qDebug() << "Returning from menu dialog!";
+    delete(mnu_dlg);
+/*
     plr_diag = new player_dialog(this);
-    plr_diag->showFullScreen();
-
-
-
+    //plr_diag->showFullScreen();
+    plr_diag->setWindowState(Qt::WindowFullScreen);
+    //give data stucture to plater to get back details.
+    //application modal or window modal. both modes can be usefull
+    plr_diag->exec();
+    qDebug() << "Returning from player!";
+    delete(plr_diag);
+//note in this case recording will be stopped while in menu
+    //might be a good thing
+    */
 
 }

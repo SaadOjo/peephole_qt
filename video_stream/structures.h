@@ -32,7 +32,7 @@
 #include<QImage>
 #include<QWaitCondition>
 
-#define RECORDING_FREQUENCY 44100
+#define RECORDING_FREQUENCY 44100 //making the frequ
 //#define RECORDING_FREQUENCY 8000
 
 

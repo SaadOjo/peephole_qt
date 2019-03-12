@@ -41,6 +41,8 @@ private:
     encoder enc;
     safe_encode_video_context* video_ctx;
     safe_encode_audio_context* audio_ctx;
+    int filenumber;
+    char filename[50];
 
 
 

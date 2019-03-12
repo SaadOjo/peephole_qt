@@ -23,7 +23,6 @@ void videopane::paintEvent(QPaintEvent *) {
 }
 
 
-
 void videopane::setPicture(image_with_mutex *i){
 
     i->mutex.lock();

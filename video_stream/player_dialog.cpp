@@ -32,6 +32,9 @@ player_dialog::player_dialog(QWidget *parent) :
 
 player_dialog::~player_dialog()
 {
+    //stop threads
+    ui->videoplyr_pane->thread.stopThread();
+    athread.stopThread();
     delete ui;
 }
 
@@ -47,6 +50,11 @@ void player_dialog::on_pause_btn_clicked()
 {
 //pause the video
 }
+void player_dialog::setFilename(QString filename)
+{
+    ui->videoplyr_pane->thread.setFilename(filename);
+}
+
 
 void player_dialog::on_play_stop_btn_clicked()
 {
